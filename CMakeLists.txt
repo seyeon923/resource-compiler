@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(resource-compiler VERSION 0.0.0)
+project(resource_compiler VERSION 0.0.0)
 
-add_executable(resource-compiler resource_compiler.cc)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_Install OFF CACHE INTERNAL "")
+
+add_subdirectory(extern/json)
+
+add_executable(resource_compiler resource_compiler.cc)
+
+target_link_libraries(resource_compiler PRIVATE nlohmann_json::nlohmann_json)
