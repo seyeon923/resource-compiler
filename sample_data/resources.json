@@ -1,0 +1,13 @@
+{
+    "header_guard": "RESOURCES_H_",
+    "resources": [
+        {
+            "define_name": "SAMPLE_TEXT_TXT_",
+            "resource_path": "./sample_text.txt"
+        },
+        {
+            "define_name": "LENA_PNG_",
+            "resource_path": "./lena.png"
+        }
+    ]
+}
