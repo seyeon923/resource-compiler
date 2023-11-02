@@ -1,5 +1,5 @@
 set(resources_header "${CMAKE_CURRENT_BINARY_DIR}/resources.h")
-set(resources_json "${CMAKE_SOURCE_DIR}/sample_data/resources.json")
+set(resources_json "${CMAKE_CURRENT_SOURCE_DIR}/../sample_data/resources.json")
 
 add_custom_command(OUTPUT ${resources_header}
     COMMAND resource_compiler ${resources_json} ${resources_header}
