@@ -43,11 +43,21 @@ inline std::ofstream& WriteResource(
     std::vector<uint8_t> resource_data(filesize);
     resource_ifs.read(reinterpret_cast<char*>(resource_data.data()), filesize);
 
-    ofs << "constexpr uint8_t " << define_name << "[] = {" << std::hex;
+    ofs << "constexpr uint8_t " << define_name << "[] = {\n" << std::hex;
+    int cnt = 0;
     for (auto byte : resource_data) {
-        ofs << "0x" << static_cast<int>(byte) << ", ";
+        if (cnt == 0) {
+            ofs << '\t';
+        }
+        ofs << "0x" << std::setfill('0') << std::setw(2)
+            << static_cast<int>(byte) << ", ";
+
+        if (++cnt == 10) {
+            cnt = 0;
+            ofs << '\n';
+        };
     }
-    ofs << "};\n";
+    ofs << "\n};\n";
 
     return ofs;
 }
