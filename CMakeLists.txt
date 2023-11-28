@@ -8,10 +8,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(include_resource_compiler_tests "Include tests for resource_compiler" ON)
 
 # Add nlohmann_json extern project
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-set(JSON_Install OFF CACHE INTERNAL "")
+find_package(nlohmann_json 3.11.2...<4.0.0)
 
-add_subdirectory(extern/json)
+if(NOT ${nlohmann_json_FOUND})
+    message("Package nlohmann_json was not found, so include nlohmann_json by FetchContent")
+
+    include(FetchContent)
+
+    FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+    FetchContent_MakeAvailable(json)
+endif()
 
 add_executable(resource_compiler resource_compiler.cc)
 
