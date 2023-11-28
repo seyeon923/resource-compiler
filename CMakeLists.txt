@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(include_resource_compiler_tests "Include tests for resource_compiler" ON)
 
 # Add nlohmann_json extern project
-find_package(nlohmann_json 3.11.2...<4.0.0)
+find_package(nlohmann_json 3.11.2...<4.0.0 QUIET)
 
 if(NOT ${nlohmann_json_FOUND})
     message("Package nlohmann_json was not found, so include nlohmann_json by FetchContent")
