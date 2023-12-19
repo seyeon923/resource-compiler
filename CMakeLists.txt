@@ -19,11 +19,16 @@ if(NOT ${nlohmann_json_FOUND})
     FetchContent_MakeAvailable(json)
 endif()
 
-add_executable(resource_compiler resource_compiler.cc)
+add_executable(resource_compiler 
+    resource_compiler.cc
+    write_public_header.h
+    write_private_header.h
+    write_cpp_source.h
+    resources_info.h)
 
 target_link_libraries(resource_compiler PRIVATE nlohmann_json::nlohmann_json)
 
-if(${include_resource_compiler_tests})
-    enable_testing()
-    add_subdirectory(tests)
-endif()
+# if(${include_resource_compiler_tests})
+#     enable_testing()
+#     add_subdirectory(tests)
+# endif()

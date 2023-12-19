@@ -2,10 +2,12 @@
     "header_guard": "RESOURCES_H_",
     "resources": [
         {
+            "key": "sample_text",
             "define_name": "SAMPLE_TEXT_TXT_",
             "resource_path": "./sample_text.txt"
         },
         {
+            "key": "lena",
             "define_name": "LENA_PNG_",
             "resource_path": "./lena.png"
         }
