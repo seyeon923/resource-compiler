@@ -69,6 +69,8 @@ target_link_libraries(resource_compiler
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE Boost::uuid)
 
+include(compile_resources.cmake)
+
 if(${include_resource_compiler_tests})
     enable_testing()
     add_subdirectory(tests)
