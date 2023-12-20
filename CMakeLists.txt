@@ -32,17 +32,29 @@ add_compile_options(
 
 option(include_resource_compiler_tests "Include tests for resource_compiler" ON)
 
+set(FETCHCONTENT_QUIET OFF)
+
+include(FetchContent)
+
 # Add nlohmann_json extern project
 find_package(nlohmann_json 3.11.2...<4.0.0 QUIET)
 
 if(NOT ${nlohmann_json_FOUND})
     message("Package nlohmann_json was not found, so include nlohmann_json by FetchContent")
 
-    include(FetchContent)
-
-    FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+    FetchContent_Declare(json 
+        URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+        URL_HASH SHA256=d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d)
     FetchContent_MakeAvailable(json)
 endif()
+
+FetchContent_Declare(
+    Boost
+    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.7z
+    URL_HASH SHA256=ce132f85fc706aa8b5c7e6e52a8338de33a688e92e7c8fada3713194b109232e
+    )
+set(BOOST_INCLUDE_LIBRARIES uuid)
+FetchContent_MakeAvailable(Boost)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
@@ -53,7 +65,11 @@ add_executable(resource_compiler
     src/write_cpp_source.h
     src/resources_info.h)
 
-target_link_libraries(resource_compiler PRIVATE nlohmann_json::nlohmann_json)
+target_include_directories(resource_compiler PRIVATE ${boost_SOURCE_DIR})
+target_link_libraries(resource_compiler 
+    PRIVATE nlohmann_json::nlohmann_json
+    PRIVATE Boost::uuid)
+
 
 # if(${include_resource_compiler_tests})
 #     enable_testing()

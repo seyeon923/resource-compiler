@@ -10,6 +10,10 @@
 
 #include <nlohmann/json.hpp>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include "src/utils.h"
 
 using json = nlohmann::json;
@@ -32,16 +36,17 @@ public:
           resource_path(std::move(resource_path)) {}
 };
 
-inline std::string KeyToDefineName(const std::string& key) {
-    std::string define_name(key.size() + 1, '_');
-
-    std::transform(std::begin(key), std::end(key), std::begin(define_name) + 1,
-                   [](char ch) {
-                       if (std::isalnum(static_cast<unsigned char>(ch))) {
+inline std::string GetRandomDefineName() {
+    static boost::uuids::random_generator uuid_gen;
+    boost::uuids::uuid uuid = uuid_gen();
+    std::string define_name = boost::uuids::to_string(uuid);
+    std::transform(std::begin(define_name), std::end(define_name),
+                   std::begin(define_name), [](char ch) {
+                       if (ch == '-') {
+                           return '_';
+                       } else {
                            return static_cast<char>(
                                std::toupper(static_cast<unsigned char>(ch)));
-                       } else {
-                           return '_';
                        }
                    });
     return define_name;
@@ -80,7 +85,7 @@ inline std::vector<ResourceInfo> GetResourcesInfo(
 
         auto define_name_it = resource.find("define_name");
         if (define_name_it == std::end(resource)) {
-            define_name = KeyToDefineName(key);
+            define_name = GetRandomDefineName();
         } else {
             define_name = Trim(define_name_it->get<std::string>());
         }
