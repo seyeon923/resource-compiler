@@ -1,7 +1,3 @@
-#include <string>
-#include <fstream>
-
-constexpr char PUBLIC_HEADER_CONTENT[] = R"(
 #ifndef SEYEON_RESOURCE_COMPILER_COMPILED_RESOURCES_H_
 #define SEYEON_RESOURCE_COMPILER_COMPILED_RESOURCES_H_
 
@@ -39,7 +35,8 @@ SEYEON_COMPILED_RESOURCES_API int seyeon_compiled_resources_save_resource(
 
 #    include <string>
 
-namespace seyeon_compiled_resources {
+namespace seyeon {
+namespace compiled_resources {
 int GetResource(const std::string& key, uint8_t const*& resource_data,
                 size_t& resource_size) {
     return seyeon_compiled_resources_get_resource(key.c_str(), &resource_data,
@@ -49,18 +46,8 @@ int SaveResource(const std::string& key, const std::string& filename) {
     return seyeon_compiled_resources_save_resource(key.c_str(),
                                                    filename.c_str());
 }
-}  // namespace seyeon_compiled_resources
+}  // namespace compiled_resources
+}  // namespace seyeon
 #endif
 
 #endif  // SEYEON_RESOURCE_COMPILER_COMPILED_RESOURCES_H_
-)";
-
-inline void WritePublicHeader(const std::string& public_header_path) {
-    std::ofstream ofs{public_header_path};
-    if (!ofs.is_open()) {
-        throw std::runtime_error("Failed to open public header file " +
-                                 public_header_path);
-    }
-    ofs << PUBLIC_HEADER_CONTENT;
-    ofs.close();
-}

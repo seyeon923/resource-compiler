@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <stdexcept>
 
-#include "resources.h"
+#include "seyeon/compiled_resources.h"
 
 namespace fs = std::filesystem;
 
@@ -21,9 +21,9 @@ int main(int argc, char** argv) {
     }
 
     try {
-        seyeon_compiled_resources::SaveResource(
+        seyeon::compiled_resources::SaveResource(
             "1.sample_text", (save_dir / "sample_text.txt").string());
-        seyeon_compiled_resources::SaveResource(
+        seyeon::compiled_resources::SaveResource(
             "2.lena", (save_dir / "lena.png").string());
     } catch (std::exception& ex) {
         std::cerr << ex.what() << std::endl;

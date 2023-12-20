@@ -60,7 +60,6 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 add_executable(resource_compiler 
     src/resource_compiler.cc
-    src/write_public_header.h
     src/write_private_header.h
     src/write_cpp_source.h
     src/resources_info.h)
@@ -69,7 +68,7 @@ target_link_libraries(resource_compiler
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE Boost::uuid)
 
-include(compile_resources.cmake)
+#include(compile_resources.cmake)
 
 if(${include_resource_compiler_tests})
     enable_testing()

@@ -56,11 +56,10 @@ int seyeon_compiled_resources_save_resource(char const* key,
 
 inline void WriteCppSource(const std::string& cpp_source_path,
                            const std::string& private_header_path,
-                           const std::string& public_header_path,
                            const std::vector<ResourceInfo>& resources_info) {
     std::ofstream cpp_source_ofs{cpp_source_path};
 
-    cpp_source_ofs << "#include \"" << public_header_path << "\"\n\n";
+    cpp_source_ofs << "#include \"seyeon/compiled_resources.h\"\n\n";
 
     cpp_source_ofs << "#include <map>\n"
                       "#include <iostream>\n"
