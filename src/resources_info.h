@@ -10,6 +10,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "src/utils.h"
+
 using json = nlohmann::json;
 
 namespace fs = std::filesystem;
@@ -74,13 +76,13 @@ inline std::vector<ResourceInfo> GetResourcesInfo(
             throw std::runtime_error("Cannot find \"key\" entry from " +
                                      resource_id);
         }
-        key = key_it->get<std::string>();
+        key = Trim(key_it->get<std::string>());
 
         auto define_name_it = resource.find("define_name");
         if (define_name_it == std::end(resource)) {
             define_name = KeyToDefineName(key);
         } else {
-            define_name = define_name_it->get<std::string>();
+            define_name = Trim(define_name_it->get<std::string>());
         }
 
         auto resource_path_it = resource.find("resource_path");
