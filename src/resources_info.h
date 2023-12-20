@@ -39,7 +39,7 @@ public:
 inline std::string GetRandomDefineName() {
     static boost::uuids::random_generator uuid_gen;
     boost::uuids::uuid uuid = uuid_gen();
-    std::string define_name = boost::uuids::to_string(uuid);
+    std::string define_name = "_" + boost::uuids::to_string(uuid);
     std::transform(std::begin(define_name), std::end(define_name),
                    std::begin(define_name), [](char ch) {
                        if (ch == '-') {

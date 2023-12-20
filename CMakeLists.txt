@@ -65,13 +65,11 @@ add_executable(resource_compiler
     src/write_cpp_source.h
     src/resources_info.h)
 
-target_include_directories(resource_compiler PRIVATE ${boost_SOURCE_DIR})
 target_link_libraries(resource_compiler 
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE Boost::uuid)
 
-
-# if(${include_resource_compiler_tests})
-#     enable_testing()
-#     add_subdirectory(tests)
-# endif()
+if(${include_resource_compiler_tests})
+    enable_testing()
+    add_subdirectory(tests)
+endif()
