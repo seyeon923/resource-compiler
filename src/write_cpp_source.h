@@ -1,7 +1,7 @@
 #include <string>
 #include <fstream>
 
-#include "resources_info.h"
+#include "src/resources_info.h"
 
 constexpr char IMPLEMENTATIONS[] = R"(
 int seyeon_compiled_resources_get_resource(char const* key,

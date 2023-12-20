@@ -2,7 +2,7 @@
 #include <string>
 #include <iomanip>
 
-#include "resources_info.h"
+#include "src/resources_info.h"
 
 inline std::ofstream& WriteResourceToPrivateHeader(
     std::ofstream& ofs, const ResourceInfo& resource_info) {

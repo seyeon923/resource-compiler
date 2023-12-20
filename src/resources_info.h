@@ -1,5 +1,5 @@
-#ifndef RESOURCE_COMPILER_RESOURCES_INFO_H_
-#define RESOURCE_COMPILER_RESOURCES_INFO_H_
+#ifndef RESOURCE_COMPILER_SRC_RESOURCES_INFO_H_
+#define RESOURCE_COMPILER_SRC_RESOURCES_INFO_H_
 
 #include <string>
 #include <vector>
@@ -75,4 +75,4 @@ inline std::vector<ResourceInfo> GetResourcesInfo(
     return ret;
 }
 
-#endif  // RESOURCE_COMPILER_RESOURCES_INFO_H_
+#endif  // RESOURCE_COMPILER_SRC_RESOURCES_INFO_H_

@@ -5,10 +5,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include "resources_info.h"
-#include "write_private_header.h"
-#include "write_cpp_source.h"
-#include "write_public_header.h"
+#include "src/resources_info.h"
+#include "src/write_private_header.h"
+#include "src/write_cpp_source.h"
+#include "src/write_public_header.h"
 
 namespace fs = std::filesystem;
 
@@ -24,8 +24,9 @@ inline std::string FixCppExtension(const std::string& cpp_path_str) {
     auto cpp_path = fs::path{cpp_path_str};
     std::string ext = cpp_path.extension().string();
     std::string upper_ext(ext.size(), ' ');
-    std::transform(std::begin(ext), std::end(ext), std::begin(upper_ext),
-                   [](unsigned char ch) { return std::toupper(ch); });
+    std::transform(
+        std::begin(ext), std::end(ext), std::begin(upper_ext),
+        [](unsigned char ch) { return static_cast<char>(std::toupper(ch)); });
     if (upper_ext != ".CC" && upper_ext != ".CPP" && upper_ext != ".CXX") {
         std::string filename = cpp_path.filename().string();
 
