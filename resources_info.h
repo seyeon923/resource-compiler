@@ -25,7 +25,7 @@ public:
                  std::string&& resource_path)
         : key(std::move(key)),
           define_name(std::move(define_name)),
-          resource_path(std::move(define_name)) {}
+          resource_path(std::move(resource_path)) {}
 };
 
 inline std::vector<ResourceInfo> GetResourcesInfo(

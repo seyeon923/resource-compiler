@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 using json = nlohmann::json;
 
 inline std::string NormalizePath(const std::string& path) {
-    std::string ret = fs::weakly_canonical(path).string();
+    std::string ret = fs::weakly_canonical(fs::absolute(path)).string();
     std::replace(std::begin(ret), std::end(ret), '\\', '/');
     return ret;
 }
@@ -33,13 +33,18 @@ inline std::string FixCppExtension(const std::string& cpp_path_str) {
         if (ext.empty()) {
             filename += ".cc";
         } else {
-            filename = filename.substr(0, filename.find_last_of(ext)) + ".cc";
+            filename = filename.substr(0, filename.find_last_of('.')) + ".cc";
         }
-        new_path = cpp_path.parent_path().string() + "/" + filename;
+        auto parent_path = cpp_path.parent_path().string();
+        if (parent_path.empty()) {
+            new_path = std::move(filename);
+        } else {
+            new_path = parent_path + "/" + filename;
+        }
 
         std::cerr << "C++ source file \"" << cpp_path_str
                   << "\" doesn't have C++ extension, "
-                  << "so C++ source will be written to " << new_path
+                  << "so C++ source will be written to \"" << new_path << '"'
                   << std::endl;
         return new_path;
     } else {
