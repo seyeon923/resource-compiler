@@ -53,7 +53,7 @@ inline std::string FixCppExtension(const std::string& cpp_path_str) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 5) {
+    if (argc < 4) {
         std::cerr << "Usage: " << argv[0] << " <resources json file>"
                   << " <private resource header file>"
                   << " <c++ source file>" << std::endl;

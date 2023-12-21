@@ -4,7 +4,7 @@ set(resources_cpp_path "${CMAKE_CURRENT_BINARY_DIR}/resources.cc")
 set(resources_pub_header "${PROJECT_SOURCE_DIR}/include/seyeon/compiled_resources.h")
 
 add_custom_command(OUTPUT ${resources_priv_header} ${resources_cpp_path}
-    COMMAND resource_compiler ${resources_json} ${resources_priv_header} ${resources_cpp_path} ${resources_pub_header}
+    COMMAND resource_compiler ${resources_json} ${resources_priv_header} ${resources_cpp_path} 
     DEPENDS resource_compiler ${resources_json}
             "${PROJECT_SOURCE_DIR}/sample_data/sample_text.txt"
             "${PROJECT_SOURCE_DIR}/sample_data/lena.png")
