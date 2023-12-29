@@ -66,12 +66,55 @@ inline std::string ReplaceAll(std::string_view template_str,
     return ss.str();
 }
 
-inline std::string ToUppercase(std::string_view str) {
-    std::string ret{str};
+inline void ToUppercaseInline(std::string& str) {
     std::transform(
-        std::begin(str), std::end(str), std::begin(ret),
+        std::begin(str), std::end(str), std::begin(str),
         [](unsigned char ch) { return static_cast<char>(std::toupper(ch)); });
+}
+
+inline std::string ToUppercase(const std::string& str) {
+    std::string ret{str};
+    ToUppercaseInline(ret);
     return ret;
+}
+
+inline void ToLowercaseInline(std::string& str) {
+    std::transform(
+        std::begin(str), std::end(str), std::begin(str),
+        [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+}
+
+inline std::string ToLowercase(const std::string& str) {
+    std::string ret{str};
+    ToLowercaseInline(ret);
+    return ret;
+}
+
+// Return (function_prefix, define_prefix)
+inline std::pair<std::string, std::string> GetPrefixes(
+    const std::string_view libname) {
+    if (libname.empty()) {
+        return {"", ""};
+    }
+
+    std::string function_prefix;
+    if (std::isdigit(static_cast<unsigned char>(libname[0]))) {
+        function_prefix = "_" + std::string(libname.size(), ' ');
+    } else {
+        function_prefix = libname;
+    }
+    ToLowercaseInline(function_prefix);
+
+    std::transform(std::begin(function_prefix), std::end(function_prefix),
+                   std::begin(function_prefix), [](unsigned char ch) {
+                       if (std::isalnum(ch)) {
+                           return static_cast<char>(ch);
+                       } else {
+                           return '_';
+                       }
+                   });
+
+    return {function_prefix, ToUppercase(function_prefix)};
 }
 
 #endif  // SEYEON_RESOURCE_COMPILER_SRC_UTILS_H_

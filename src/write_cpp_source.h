@@ -12,43 +12,43 @@ int {{function_prefix}}_get_resource(char const* key,
     try {
         auto it = resource_map.find(key);
         if (it == std::end(resource_map)) {
-            return {{upper_case_function_prefix}}_NOT_FOUND_ERROR;
+            return {{define_prefix}}_NOT_FOUND_ERROR;
         }
 
         *resource_data = it->second.first;
         *resource_size = it->second.second;
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
-        return {{upper_case_function_prefix}}_UNKNOWN_ERROR;
+        return {{define_prefix}}_UNKNOWN_ERROR;
     }
 
-    return {{upper_case_function_prefix}}_NO_ERROR;
+    return {{define_prefix}}_NO_ERROR;
 }
 
 int {{function_prefix}}_save_resource(char const* key,
                                             char const* filename) {
     using namespace std::string_literals;
-    int ret = {{upper_case_function_prefix}}_NOT_FOUND_ERROR;
+    int ret = {{define_prefix}}_NOT_FOUND_ERROR;
     try {
         uint8_t const* resource_data;
         size_t resource_size;
         ret = {{function_prefix}}_get_resource(key, &resource_data,
                                                      &resource_size);
-        if (ret != {{upper_case_function_prefix}}_NO_ERROR) {
+        if (ret != {{define_prefix}}_NO_ERROR) {
             return ret;
         }
 
         std::ofstream ofs{filename, std::ios::binary};
         if (!ofs.is_open()) {
-            ret = {{upper_case_function_prefix}}_FILE_OPEN_ERROR;
+            ret = {{define_prefix}}_FILE_OPEN_ERROR;
             throw std::runtime_error("Failed to open file "s + filename);
         }
 
         ofs.write(reinterpret_cast<char const*>(resource_data), resource_size);
     } catch (std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
-        if (ret == {{upper_case_function_prefix}}_NO_ERROR) {
-            ret = {{upper_case_function_prefix}}_UNKNOWN_ERROR;
+        if (ret == {{define_prefix}}_NO_ERROR) {
+            ret = {{define_prefix}}_UNKNOWN_ERROR;
         }
     }
 
@@ -104,10 +104,10 @@ inline void WritePrivateHeader(
     }
 }
 
-inline void WriteCppSource(
-    const std::string& cpp_source_path,
-    const std::vector<ResourceInfo>& resources_info,
-    std::string_view function_prefix = "seyeon_compiled_resources") {
+inline void WriteCppSource(const std::string& cpp_source_path,
+                           const std::vector<ResourceInfo>& resources_info,
+                           const std::string& function_prefix,
+                           const std::string& define_prefix) {
     std::ofstream cpp_source_ofs{cpp_source_path};
     if (!cpp_source_ofs.is_open()) {
         throw std::runtime_error("Failed to open file " + cpp_source_path +
@@ -134,8 +134,7 @@ inline void WriteCppSource(
     std::string implementations = ReplaceAll(
         IMPLEMENTATIONS_TEMPLATE, "{{function_prefix}}", function_prefix);
     implementations =
-        ReplaceAll(implementations, "{{upper_case_function_prefix}}",
-                   ToUppercase(function_prefix));
+        ReplaceAll(implementations, "{{define_prefix}}", define_prefix);
 
     cpp_source_ofs << implementations;
 }

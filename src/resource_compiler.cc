@@ -52,22 +52,36 @@ inline std::string FixCppExtension(const std::string& cpp_path_str) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
+    if (argc < 5) {
         std::cerr << "Usage: " << argv[0] << " <resources json file>"
-                  << " <c++ source file>" << std::endl;
+                  << " <c++ source file> <public header file> <library name> "
+                     "[extra c++ namespaces ...]"
+                  << std::endl;
         return 1;
     }
 
-    const std::string resources_json_path{argv[1]};
-    const std::string cpp_source_path{FixCppExtension(argv[2])};
-
     try {
+        const std::string resources_json_path{argv[1]};
+        const std::string cpp_source_path{FixCppExtension(argv[2])};
+        const std::string pub_header_path{argv[3]};
+        const std::string_view libname{argv[4]};
+
+        std::vector<std::string> extra_cc_namespaces;
+        if (argc > 5) {
+            for (int i = 5; i < argc; ++i) {
+                extra_cc_namespaces.push_back(argv[i]);
+            }
+        }
+
         auto resources_info = GetResourcesInfo(resources_json_path);
 
-        WriteCppSource(cpp_source_path, resources_info);
+        auto [function_prefix, define_prefix] = GetPrefixes(libname);
+
+        WriteCppSource(cpp_source_path, resources_info, function_prefix,
+                       define_prefix);
 
     } catch (std::exception& ex) {
-        std::cerr << "Unexpected Error: " << ex.what() << std::endl;
+        std::cerr << "Error: " << ex.what() << std::endl;
         return -1;
     }
 
