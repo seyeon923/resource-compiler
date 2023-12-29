@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <string>
 #include <cctype>
+#include <string_view>
+#include <sstream>
+#include <functional>
 
 // trim from start (in place)
 inline void LTrimInplace(std::string& s) {
@@ -39,6 +42,28 @@ inline std::string RTrim(std::string s) {
 inline std::string Trim(std::string s) {
     TrimInplace(s);
     return s;
+}
+
+inline std::string ReplaceAll(std::string_view template_str,
+                              std::string_view pattern,
+                              std::string_view replace_str) {
+    std::stringstream ss;
+    std::boyer_moore_searcher searcher{std::begin(pattern), std::end(pattern)};
+
+    auto it = std::begin(template_str);
+    while (it != std::end(template_str)) {
+        auto search_begin = it;
+        it = std::search(search_begin, std::end(template_str), searcher);
+
+        ss << std::string_view(&(*search_begin),
+                               std::distance(search_begin, it));
+        if (it != std::end(template_str)) {
+            std::advance(it, pattern.size());
+            ss << replace_str;
+        }
+    }
+
+    return ss.str();
 }
 
 #endif  // SEYEON_RESOURCE_COMPILER_SRC_UTILS_H_
