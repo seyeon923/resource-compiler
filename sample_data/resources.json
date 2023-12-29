@@ -6,7 +6,6 @@
         },
         {
             "key": "2.lena",
-            "define_name": "LENA_PNG_",
             "resource_path": "./lena.png"
         }
     ]

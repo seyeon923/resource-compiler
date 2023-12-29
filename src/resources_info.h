@@ -74,7 +74,7 @@ inline std::vector<ResourceInfo> GetResourcesInfo(
     for (auto& [idx, resource] : resources_it->items()) {
         const std::string resource_id{"resources[" + idx + "]"};
 
-        std::string key, define_name, resource_path;
+        std::string key, resource_path;
 
         auto key_it = resource.find("key");
         if (key_it == std::end(resource)) {
@@ -82,13 +82,6 @@ inline std::vector<ResourceInfo> GetResourcesInfo(
                                      resource_id);
         }
         key = Trim(key_it->get<std::string>());
-
-        auto define_name_it = resource.find("define_name");
-        if (define_name_it == std::end(resource)) {
-            define_name = GetRandomDefineName();
-        } else {
-            define_name = Trim(define_name_it->get<std::string>());
-        }
 
         auto resource_path_it = resource.find("resource_path");
         if (resource_path_it == std::end(resource)) {
@@ -99,7 +92,7 @@ inline std::vector<ResourceInfo> GetResourcesInfo(
                                       resource_path_it->get<fs::path>())
                             .string();
 
-        ret.emplace_back(std::move(key), std::move(define_name),
+        ret.emplace_back(std::move(key), GetRandomDefineName(),
                          std::move(resource_path));
     }
     return ret;
