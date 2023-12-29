@@ -66,4 +66,12 @@ inline std::string ReplaceAll(std::string_view template_str,
     return ss.str();
 }
 
+inline std::string ToUppercase(std::string_view str) {
+    std::string ret{str};
+    std::transform(
+        std::begin(str), std::end(str), std::begin(ret),
+        [](unsigned char ch) { return static_cast<char>(std::toupper(ch)); });
+    return ret;
+}
+
 #endif  // SEYEON_RESOURCE_COMPILER_SRC_UTILS_H_

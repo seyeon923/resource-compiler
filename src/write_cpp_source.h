@@ -56,11 +56,63 @@ int {{function_prefix}}_save_resource(char const* key,
 }
 )";
 
+inline std::ofstream& WriteResourceToPrivateHeader(
+    std::ofstream& ofs, const ResourceInfo& resource_info) {
+    auto& resource_path = resource_info.resource_path;
+    auto& define_name = resource_info.define_name;
+
+    std::ifstream resource_ifs(resource_path, std::ios::binary);
+    if (!resource_ifs.is_open()) {
+        throw std::runtime_error("Failed to open resource file " +
+                                 resource_path);
+    }
+
+    resource_ifs.seekg(0, std::ios::end);
+    size_t filesize = resource_ifs.tellg();
+    resource_ifs.seekg(0);
+
+    std::vector<uint8_t> resource_data(filesize);
+    resource_ifs.read(reinterpret_cast<char*>(resource_data.data()), filesize);
+
+    ofs << "constexpr uint8_t " << define_name << "[] = {\n" << std::hex;
+    int cnt = 0;
+    for (auto byte : resource_data) {
+        if (cnt == 0) {
+            ofs << '\t';
+        }
+        ofs << "0x" << std::setfill('0') << std::setw(2)
+            << static_cast<int>(byte) << ", ";
+
+        if (++cnt == 10) {
+            cnt = 0;
+            ofs << '\n';
+        };
+    }
+    ofs << "\n};\n";
+
+    return ofs;
+}
+
+inline void WritePrivateHeader(
+    std::ofstream& header_ofs,
+    const std::vector<ResourceInfo>& resources_info) {
+    header_ofs << "#include <cstdint>\n";
+    header_ofs << '\n';
+
+    for (auto& resource_info : resources_info) {
+        WriteResourceToPrivateHeader(header_ofs, resource_info);
+    }
+}
+
 inline void WriteCppSource(
-    const std::string& cpp_source_path, const std::string& private_header_path,
+    const std::string& cpp_source_path,
     const std::vector<ResourceInfo>& resources_info,
     std::string_view function_prefix = "seyeon_compiled_resources") {
     std::ofstream cpp_source_ofs{cpp_source_path};
+    if (!cpp_source_ofs.is_open()) {
+        throw std::runtime_error("Failed to open file " + cpp_source_path +
+                                 " to write C++ source");
+    }
 
     cpp_source_ofs << "#include \"seyeon/compiled_resources.h\"\n\n";
 
@@ -68,7 +120,7 @@ inline void WriteCppSource(
                       "#include <iostream>\n"
                       "#include <fstream>\n\n";
 
-    cpp_source_ofs << "#include \"" << private_header_path << "\"\n\n";
+    WritePrivateHeader(cpp_source_ofs, resources_info);
 
     cpp_source_ofs << "static std::map<std::string, std::pair<uint8_t const*, "
                       "size_t>> resource_map{\n";
@@ -79,18 +131,11 @@ inline void WriteCppSource(
     }
     cpp_source_ofs << "};\n\n";
 
-    std::string uppercase_function_prefix(function_prefix);
-    std::transform(std::begin(uppercase_function_prefix),
-                   std::end(uppercase_function_prefix),
-                   std::begin(uppercase_function_prefix), [](unsigned char c) {
-                       return static_cast<char>(std::toupper(c));
-                   });
-
     std::string implementations = ReplaceAll(
         IMPLEMENTATIONS_TEMPLATE, "{{function_prefix}}", function_prefix);
     implementations =
         ReplaceAll(implementations, "{{upper_case_function_prefix}}",
-                   uppercase_function_prefix);
+                   ToUppercase(function_prefix));
 
     cpp_source_ofs << implementations;
 }

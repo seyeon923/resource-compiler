@@ -60,7 +60,6 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 add_executable(resource_compiler 
     src/resource_compiler.cc
-    src/write_private_header.h
     src/write_cpp_source.h
     src/resources_info.h)
 

@@ -6,7 +6,6 @@
 #include <nlohmann/json.hpp>
 
 #include "src/resources_info.h"
-#include "src/write_private_header.h"
 #include "src/write_cpp_source.h"
 
 namespace fs = std::filesystem;
@@ -53,22 +52,19 @@ inline std::string FixCppExtension(const std::string& cpp_path_str) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 4) {
+    if (argc < 3) {
         std::cerr << "Usage: " << argv[0] << " <resources json file>"
-                  << " <private resource header file>"
                   << " <c++ source file>" << std::endl;
         return 1;
     }
 
     const std::string resources_json_path{argv[1]};
-    const std::string private_header_path{NormalizePath(argv[2])};
-    const std::string cpp_source_path{FixCppExtension(argv[3])};
+    const std::string cpp_source_path{FixCppExtension(argv[2])};
 
     try {
         auto resources_info = GetResourcesInfo(resources_json_path);
 
-        WritePrivateHeader(private_header_path, resources_info);
-        WriteCppSource(cpp_source_path, private_header_path, resources_info);
+        WriteCppSource(cpp_source_path, resources_info);
 
     } catch (std::exception& ex) {
         std::cerr << "Unexpected Error: " << ex.what() << std::endl;
