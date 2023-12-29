@@ -49,22 +49,12 @@ inline void WritePrivateHeader(
         throw std::runtime_error("Failed to open out header file " +
                                  private_header_path);
     }
-
-    constexpr char HEADER_GUARD[] =
-        "SEYEON_RESOURCE_COMPILER_PRIVATE_RESOURCES_H_";
-
-    header_ofs << "#ifndef " << HEADER_GUARD << '\n';
-    header_ofs << "#define " << HEADER_GUARD << '\n';
-    header_ofs << '\n';
     header_ofs << "#include <cstdint>\n";
     header_ofs << '\n';
 
     for (auto& resource_info : resources_info) {
         WriteResourceToPrivateHeader(header_ofs, resource_info);
     }
-
-    header_ofs << '\n';
-    header_ofs << "#endif // " << HEADER_GUARD;
 
     header_ofs.close();
 }
