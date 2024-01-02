@@ -16,10 +16,6 @@
 
 #include "src/utils.h"
 
-using json = nlohmann::json;
-
-namespace fs = std::filesystem;
-
 class ResourceInfo {
 public:
     std::string key;
@@ -54,6 +50,9 @@ inline std::string GetRandomDefineName() {
 
 inline std::vector<ResourceInfo> GetResourcesInfo(
     const std::string& json_path) {
+    namespace fs = std::filesystem;
+    using json = nlohmann::json;
+
     auto resources_base_dir = fs::path{json_path}.parent_path();
 
     std::ifstream json_ifs{json_path};

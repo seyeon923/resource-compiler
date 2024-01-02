@@ -106,6 +106,7 @@ inline void WritePrivateHeader(
 }
 
 inline void WriteCppSource(const std::string& cpp_source_path,
+                           const std::string& pub_header_path,
                            const std::vector<ResourceInfo>& resources_info,
                            const std::string& function_prefix,
                            const std::string& define_prefix) {
@@ -115,7 +116,8 @@ inline void WriteCppSource(const std::string& cpp_source_path,
                                  " to write C++ source");
     }
 
-    cpp_source_ofs << "#include \"seyeon/compiled_resources.h\"\n\n";
+    cpp_source_ofs << "#include \"" << fs::absolute(pub_header_path).string()
+                   << "\"\n";
 
     cpp_source_ofs << "#include <map>\n"
                       "#include <iostream>\n"

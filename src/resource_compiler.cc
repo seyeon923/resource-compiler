@@ -7,6 +7,7 @@
 
 #include "src/resources_info.h"
 #include "src/write_cpp_source.h"
+#include "src/write_public_header.h"
 
 namespace fs = std::filesystem;
 
@@ -77,8 +78,11 @@ int main(int argc, char* argv[]) {
 
         auto [function_prefix, define_prefix] = GetPrefixes(libname);
 
-        cc_source::WriteCppSource(cpp_source_path, resources_info,
-                                  function_prefix, define_prefix);
+        cc_source::WriteCppSource(cpp_source_path, pub_header_path,
+                                  resources_info, function_prefix,
+                                  define_prefix);
+        public_header::WritePublicHeader(pub_header_path, function_prefix,
+                                         define_prefix, extra_cc_namespaces);
 
     } catch (std::exception& ex) {
         std::cerr << "Error: " << ex.what() << std::endl;
