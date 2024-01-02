@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <cctype>
+#include <filesystem>
 
 #include "src/resources_info.h"
 #include "utils.h"
@@ -110,6 +111,8 @@ inline void WriteCppSource(const std::string& cpp_source_path,
                            const std::vector<ResourceInfo>& resources_info,
                            const std::string& function_prefix,
                            const std::string& define_prefix) {
+    namespace fs = std::filesystem;
+
     std::ofstream cpp_source_ofs{cpp_source_path};
     if (!cpp_source_ofs.is_open()) {
         throw std::runtime_error("Failed to open file " + cpp_source_path +

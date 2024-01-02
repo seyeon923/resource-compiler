@@ -66,6 +66,7 @@ int GetResource(const std::string& key, uint8_t const*& resource_data,
 int SaveResource(const std::string& key, const std::string& filename) {
     return {{function_prefix}}_save_resource(key.c_str(),
                                                    filename.c_str());
+}
 )";
 
 inline void WritePublicHeader(
@@ -91,18 +92,15 @@ inline void WritePublicHeader(
                              define_prefix_placeholder, define_prefix)
                << '\n';
 
-    header_ofs << ReplaceAll(API_DEFINE_TEMPLATE, define_prefix, define_prefix)
+    header_ofs << ReplaceAll(API_DEFINE_TEMPLATE, define_prefix_placeholder,
+                             define_prefix)
                << '\n';
 
     header_ofs << C_INCLUDE << '\n';
 
-    header_ofs << "#ifdef __cplusplus\n"
-                  "{\n"
-                  "#endif\n";
+    header_ofs << "#ifdef __cplusplus\n";
     header_ofs << CC_INCLUDE << '\n';
-    header_ofs << "#ifdef __cplusplus\n"
-                  "}\n"
-                  "#endif\n";
+    header_ofs << "#endif // __cplusplus\n";
 
     header_ofs << ReplaceAll(C_DEFINE_TEMPLATE, define_prefix_placeholder,
                              define_prefix)
@@ -110,7 +108,7 @@ inline void WritePublicHeader(
 
     header_ofs << "#ifdef __cplusplus\n"
                   "extern \"C\" {\n"
-                  "#endif\n";
+                  "#endif // __cplusplus\n";
     header_ofs << ReplaceAll(
                       ReplaceAll(C_FUNCTION_TEMPLATE, define_prefix_placeholder,
                                  define_prefix),
@@ -118,25 +116,22 @@ inline void WritePublicHeader(
                << '\n';
     header_ofs << "#ifdef __cplusplus\n"
                   "}\n"
-                  "#endif\n";
+                  "#endif // __cplusplus\n";
 
-    header_ofs << "#ifdef __cplusplus\n"
-                  "{\n"
-                  "#endif";
-    header_ofs << "namespace " << function_prefix << " {\n";
+    header_ofs << "#ifdef __cplusplus\n";
+
     for (const auto& cc_namespace : extra_cc_namespaces) {
         header_ofs << "namespace " << cc_namespace << " {\n";
     }
+    header_ofs << "namespace " << function_prefix << " {\n";
     header_ofs << ReplaceAll(CC_FUNCTION_TEMPLATE, function_prefix_placeholder,
                              function_prefix);
+    header_ofs << "} // namespace " << function_prefix << '\n';
     for (auto it = extra_cc_namespaces.rbegin();
          it != extra_cc_namespaces.rend(); ++it) {
         header_ofs << "} // namespace " << *it << '\n';
     }
-    header_ofs << "} // namespace " << function_prefix << '\n';
-    header_ofs << "#ifdef __cplusplus\n"
-                  "}\n"
-                  "#endif";
+    header_ofs << "#endif // __cplusplus";
 
     header_ofs << ReplaceAll(HEADER_GUARD_CLOSE_TEMPLATE,
                              define_prefix_placeholder, define_prefix);
