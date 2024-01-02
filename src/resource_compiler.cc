@@ -77,8 +77,8 @@ int main(int argc, char* argv[]) {
 
         auto [function_prefix, define_prefix] = GetPrefixes(libname);
 
-        WriteCppSource(cpp_source_path, resources_info, function_prefix,
-                       define_prefix);
+        cc_source::WriteCppSource(cpp_source_path, resources_info,
+                                  function_prefix, define_prefix);
 
     } catch (std::exception& ex) {
         std::cerr << "Error: " << ex.what() << std::endl;

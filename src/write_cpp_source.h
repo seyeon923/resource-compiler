@@ -5,6 +5,7 @@
 #include "src/resources_info.h"
 #include "utils.h"
 
+namespace cc_source {
 constexpr char IMPLEMENTATIONS_TEMPLATE[] = R"(
 int {{function_prefix}}_get_resource(char const* key,
                                            uint8_t const** resource_data,
@@ -138,3 +139,4 @@ inline void WriteCppSource(const std::string& cpp_source_path,
 
     cpp_source_ofs << implementations;
 }
+}  // namespace cc_source
