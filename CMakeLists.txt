@@ -48,14 +48,6 @@ if(NOT ${nlohmann_json_FOUND})
     FetchContent_MakeAvailable(json)
 endif()
 
-FetchContent_Declare(
-    Boost
-    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.7z
-    URL_HASH SHA256=ce132f85fc706aa8b5c7e6e52a8338de33a688e92e7c8fada3713194b109232e
-    )
-set(BOOST_INCLUDE_LIBRARIES uuid)
-FetchContent_MakeAvailable(Boost)
-
 include_directories(${PROJECT_SOURCE_DIR})
 
 add_executable(resource_compiler 
@@ -64,8 +56,7 @@ add_executable(resource_compiler
     src/resources_info.h)
 
 target_link_libraries(resource_compiler 
-    PRIVATE nlohmann_json::nlohmann_json
-    PRIVATE Boost::uuid)
+    PRIVATE nlohmann_json::nlohmann_json)
 
 #include(compile_resources.cmake)
 
