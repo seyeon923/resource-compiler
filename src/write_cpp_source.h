@@ -7,37 +7,64 @@
 #include "utils.h"
 
 namespace cc_source {
-constexpr char IMPLEMENTATIONS_TEMPLATE[] = R"(
-int {{function_prefix}}_get_resource(char const* key,
-                                           uint8_t const** resource_data,
-                                           size_t* resource_size) {
-    try {
-        auto it = resource_map.find(key);
-        if (it == std::end(resource_map)) {
-            return {{define_prefix}}_NOT_FOUND_ERROR;
-        }
 
-        *resource_data = it->second.first;
-        *resource_size = it->second.second;
+constexpr char INCLUDE[] = R"(
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <cstdlib>
+#include <cstdint>
+)";
+
+constexpr char GET_RESOURCE_IMPLEMENTATION_OPEN_TEMPLATE[] = R"(
+int {{function_prefix}}_get_resource(char const* key,
+                                           uint8_t** resource_data,
+                                           size_t* resource_size,
+                                           void* (*malloc_fn)(size_t),
+                                           void (*free_fn)(void*)) {
+    using namespace std::string_literals;
+
+    int ret = {{define_prefix}}_NO_ERROR;
+    *resource_data = nullptr;
+    *resource_size = 0;
+
+    try {
+        std::string key_str{key};
+)";
+constexpr char GET_RESOURCE_IMPLEMENTATION_CLOSE_TEMPLATE[] = R"(
+        else {
+            ret = {{define_prefix}}_NOT_FOUND_ERROR;
+        }
     } catch (std::exception& e) {
+        if (ret == {{define_prefix}}_NO_ERROR) {
+            ret = {{define_prefix}}_UNKNOWN_ERROR;
+        }
+        if (free_fn != nullptr) {
+            free_fn(*resource_data);
+        }
+        *resource_data = nullptr;
+        *resource_size = 0;
         std::cerr << "Exception: " << e.what() << std::endl;
-        return {{define_prefix}}_UNKNOWN_ERROR;
     }
 
-    return {{define_prefix}}_NO_ERROR;
+    return ret;
 }
-
+)";
+constexpr char SAVE_RESOURCE_IMPLEMENTATION_TEMPLATE[] = R"(
 int {{function_prefix}}_save_resource(char const* key,
                                             char const* filename) {
     using namespace std::string_literals;
     int ret = {{define_prefix}}_NOT_FOUND_ERROR;
+
+    uint8_t* resource_data = nullptr;
+    size_t resource_size;
     try {
-        uint8_t const* resource_data;
-        size_t resource_size;
-        ret = {{function_prefix}}_get_resource(key, &resource_data,
-                                                     &resource_size);
+        ret = {{function_prefix}}_get_resource(
+            key, &resource_data, &resource_size, &malloc, &free);
         if (ret != {{define_prefix}}_NO_ERROR) {
-            return ret;
+            resource_data = nullptr;
+            throw std::runtime_error(
+                "{{function_prefix}}_get_resource failed");
         }
 
         std::ofstream ofs{filename, std::ios::binary};
@@ -48,20 +75,22 @@ int {{function_prefix}}_save_resource(char const* key,
 
         ofs.write(reinterpret_cast<char const*>(resource_data), resource_size);
     } catch (std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
         if (ret == {{define_prefix}}_NO_ERROR) {
             ret = {{define_prefix}}_UNKNOWN_ERROR;
         }
+        std::cerr << "Exception: " << e.what() << std::endl;
     }
+
+    free(resource_data);
 
     return ret;
 }
 )";
 
-inline std::ofstream& WriteResourceToPrivateHeader(
-    std::ofstream& ofs, const ResourceInfo& resource_info) {
+inline void WriteResourceData(std::ofstream& cpp_source_ofs,
+                              const ResourceInfo& resource_info,
+                              int base_indent = 12) {
     auto& resource_path = resource_info.resource_path;
-    auto& define_name = resource_info.define_name;
 
     std::ifstream resource_ifs(resource_path, std::ios::binary);
     if (!resource_ifs.is_open()) {
@@ -76,34 +105,25 @@ inline std::ofstream& WriteResourceToPrivateHeader(
     std::vector<uint8_t> resource_data(filesize);
     resource_ifs.read(reinterpret_cast<char*>(resource_data.data()), filesize);
 
-    ofs << "constexpr uint8_t " << define_name << "[] = {\n" << std::hex;
-    int cnt = 0;
-    for (auto byte : resource_data) {
-        if (cnt == 0) {
-            ofs << '\t';
+    std::string indent(base_indent, ' ');
+
+    cpp_source_ofs << indent << "*resource_size = " << filesize << ";\n";
+    cpp_source_ofs << indent
+                   << "*resource_data = "
+                      "static_cast<uint8_t*>(malloc_fn(*resource_size));\n\n";
+
+    cpp_source_ofs << indent;
+    for (size_t i = 0; i < filesize; ++i) {
+        uint8_t byte = resource_data[i];
+
+        cpp_source_ofs << "(*resource_data)[" << i
+                       << "] = " << static_cast<int>(byte) << "; ";
+
+        if ((i + 1) % 5 == 0) {
+            cpp_source_ofs << '\n' << indent;
         }
-        ofs << "0x" << std::setfill('0') << std::setw(2)
-            << static_cast<int>(byte) << ", ";
-
-        if (++cnt == 10) {
-            cnt = 0;
-            ofs << '\n';
-        };
     }
-    ofs << "\n};\n";
-
-    return ofs;
-}
-
-inline void WritePrivateHeader(
-    std::ofstream& header_ofs,
-    const std::vector<ResourceInfo>& resources_info) {
-    header_ofs << "#include <cstdint>\n";
-    header_ofs << '\n';
-
-    for (auto& resource_info : resources_info) {
-        WriteResourceToPrivateHeader(header_ofs, resource_info);
-    }
+    cpp_source_ofs << '\n';
 }
 
 inline void WriteCppSource(const std::string& cpp_source_path,
@@ -122,26 +142,35 @@ inline void WriteCppSource(const std::string& cpp_source_path,
     cpp_source_ofs << "#include \"" << fs::absolute(pub_header_path).string()
                    << "\"\n";
 
-    cpp_source_ofs << "#include <map>\n"
-                      "#include <iostream>\n"
-                      "#include <fstream>\n\n";
+    cpp_source_ofs << INCLUDE << '\n';
 
-    WritePrivateHeader(cpp_source_ofs, resources_info);
+    cpp_source_ofs << ReplaceAll(
+        ReplaceAll(GET_RESOURCE_IMPLEMENTATION_OPEN_TEMPLATE,
+                   "{{function_prefix}}", function_prefix),
+        "{{define_prefix}}", define_prefix);
 
-    cpp_source_ofs << "static std::map<std::string, std::pair<uint8_t const*, "
-                      "size_t>> resource_map{\n";
-    for (auto& resource_info : resources_info) {
-        cpp_source_ofs << "{\"" << resource_info.key << "\", {"
-                       << resource_info.define_name << ", sizeof("
-                       << resource_info.define_name << ")}},\n";
+    for (size_t i = 0; i < resources_info.size(); ++i) {
+        auto& resource_info = resources_info[i];
+
+        cpp_source_ofs << "        ";
+        if (i > 0) {
+            cpp_source_ofs << "else ";
+        }
+        cpp_source_ofs << "if (key_str == \"" << resource_info.key
+                       << "\"s) {\n";
+        WriteResourceData(cpp_source_ofs, resource_info);
+        cpp_source_ofs << "        }\n";
     }
-    cpp_source_ofs << "};\n\n";
 
-    std::string implementations = ReplaceAll(
-        IMPLEMENTATIONS_TEMPLATE, "{{function_prefix}}", function_prefix);
-    implementations =
-        ReplaceAll(implementations, "{{define_prefix}}", define_prefix);
+    cpp_source_ofs << ReplaceAll(
+                          ReplaceAll(GET_RESOURCE_IMPLEMENTATION_CLOSE_TEMPLATE,
+                                     "{{function_prefix}}", function_prefix),
+                          "{{define_prefix}}", define_prefix)
+                   << '\n';
 
-    cpp_source_ofs << implementations;
+    cpp_source_ofs << ReplaceAll(
+        ReplaceAll(SAVE_RESOURCE_IMPLEMENTATION_TEMPLATE, "{{function_prefix}}",
+                   function_prefix),
+        "{{define_prefix}}", define_prefix);
 }
 }  // namespace cc_source

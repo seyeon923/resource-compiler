@@ -34,6 +34,7 @@ constexpr char API_DEFINE_TEMPLATE[] = R"(
 constexpr char C_INCLUDE[] = R"(
 #include <wchar.h>
 #include <stdint.h>
+#include <stdlib.h>
 )";
 
 constexpr char CC_INCLUDE[] = R"(
@@ -50,21 +51,33 @@ constexpr char C_DEFINE_TEMPLATE[] =
 
 constexpr char C_FUNCTION_TEMPLATE[] =
     R"(
+// Get resources data identified by `key`
+//
+// - `key`: Resource ID
+// - `resource_data`: Pointer to allocated memory pointer of resource data
+// - `resource_size`: Pointer to resource data size
+// - `malloc_fn` : Memory allocation function for allocating memory
+//                 for the resource data
+// - `free_fn` : Memory deallocation function in case of failing this function
 {{define_prefix}}_API int {{function_prefix}}_get_resource(
-    char const* key, uint8_t const** resource_data, size_t* resource_size);
+    char const* key, uint8_t** resource_data, size_t* resource_size,
+    void* (*malloc_fn)(size_t), void (*free_fn)(void*));
+
+// Save resources identified by `key` to `filename` file
 {{define_prefix}}_API int {{function_prefix}}_save_resource(
     char const* key, char const* filename);
 )";
 
 constexpr char CC_FUNCTION_TEMPLATE[] =
     R"(
-int GetResource(const std::string& key, uint8_t const*& resource_data,
-                size_t& resource_size) {
-    return {{function_prefix}}_get_resource(key.c_str(), &resource_data,
-                                                  &resource_size);
+int GetResource(const std::string& key, uint8_t*& resource_data,
+                size_t& resource_size, void* (*malloc_fn)(size_t),
+                void (*free_fn)(void*)) {
+    return sample_compiled_resources_get_resource(
+        key.c_str(), &resource_data, &resource_size, malloc_fn, free_fn);
 }
 int SaveResource(const std::string& key, const std::string& filename) {
-    return {{function_prefix}}_save_resource(key.c_str(),
+    return sample_compiled_resources_save_resource(key.c_str(),
                                                    filename.c_str());
 }
 )";

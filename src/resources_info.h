@@ -10,43 +10,18 @@
 
 #include <nlohmann/json.hpp>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include "src/utils.h"
 
 class ResourceInfo {
 public:
     std::string key;
-    std::string define_name;
     std::string resource_path;
 
-    ResourceInfo(const std::string& key, const std::string& define_name,
-                 const std::string& resource_path)
-        : key(key), define_name(define_name), resource_path(resource_path) {}
-    ResourceInfo(std::string&& key, std::string&& define_name,
-                 std::string&& resource_path)
-        : key(std::move(key)),
-          define_name(std::move(define_name)),
-          resource_path(std::move(resource_path)) {}
+    ResourceInfo(const std::string& key, const std::string& resource_path)
+        : key(key), resource_path(resource_path) {}
+    ResourceInfo(std::string&& key, std::string&& resource_path)
+        : key(std::move(key)), resource_path(std::move(resource_path)) {}
 };
-
-inline std::string GetRandomDefineName() {
-    static boost::uuids::random_generator uuid_gen;
-    boost::uuids::uuid uuid = uuid_gen();
-    std::string define_name = "_" + boost::uuids::to_string(uuid);
-    std::transform(std::begin(define_name), std::end(define_name),
-                   std::begin(define_name), [](char ch) {
-                       if (ch == '-') {
-                           return '_';
-                       } else {
-                           return static_cast<char>(
-                               std::toupper(static_cast<unsigned char>(ch)));
-                       }
-                   });
-    return define_name;
-}
 
 inline std::vector<ResourceInfo> GetResourcesInfo(
     const std::string& json_path) {
@@ -91,8 +66,7 @@ inline std::vector<ResourceInfo> GetResourcesInfo(
                                       resource_path_it->get<fs::path>())
                             .string();
 
-        ret.emplace_back(std::move(key), GetRandomDefineName(),
-                         std::move(resource_path));
+        ret.emplace_back(std::move(key), std::move(resource_path));
     }
     return ret;
 }
