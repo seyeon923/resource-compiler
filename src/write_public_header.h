@@ -73,11 +73,11 @@ constexpr char CC_FUNCTION_TEMPLATE[] =
 int GetResource(const std::string& key, uint8_t*& resource_data,
                 size_t& resource_size, void* (*malloc_fn)(size_t),
                 void (*free_fn)(void*)) {
-    return sample_compiled_resources_get_resource(
+    return {{function_prefix}}_get_resource(
         key.c_str(), &resource_data, &resource_size, malloc_fn, free_fn);
 }
 int SaveResource(const std::string& key, const std::string& filename) {
-    return sample_compiled_resources_save_resource(key.c_str(),
+    return {{function_prefix}}_save_resource(key.c_str(),
                                                    filename.c_str());
 }
 )";
