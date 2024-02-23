@@ -58,12 +58,12 @@ constexpr char C_FUNCTION_TEMPLATE[] =
 
 constexpr char CC_FUNCTION_TEMPLATE[] =
     R"(
-int GetResource(const std::string& key, uint8_t const*& resource_data,
+inline int GetResource(const std::string& key, uint8_t const*& resource_data,
                 size_t& resource_size) {
     return {{function_prefix}}_get_resource(key.c_str(), &resource_data,
                                                   &resource_size);
 }
-int SaveResource(const std::string& key, const std::string& filename) {
+inline int SaveResource(const std::string& key, const std::string& filename) {
     return {{function_prefix}}_save_resource(key.c_str(),
                                                    filename.c_str());
 }
