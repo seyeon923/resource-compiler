@@ -48,13 +48,7 @@ if(NOT ${nlohmann_json_FOUND})
     FetchContent_MakeAvailable(json)
 endif()
 
-FetchContent_Declare(
-    Boost
-    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.7z
-    URL_HASH SHA256=ce132f85fc706aa8b5c7e6e52a8338de33a688e92e7c8fada3713194b109232e
-    )
-set(BOOST_INCLUDE_LIBRARIES uuid)
-FetchContent_MakeAvailable(Boost)
+find_package(Boost CONFIG REQUIRED COMPONENTS uuid)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
