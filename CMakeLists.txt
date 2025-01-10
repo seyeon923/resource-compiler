@@ -50,13 +50,11 @@ endif()
 
 find_package(Boost CONFIG REQUIRED COMPONENTS uuid)
 
-include_directories(${PROJECT_SOURCE_DIR})
-
 add_executable(resource_compiler 
     src/resource_compiler.cc
     src/write_cpp_source.h
     src/resources_info.h)
-
+target_include_directories(resource_compiler PRIVATE ${PROJECT_SOURCE_DIR})
 target_link_libraries(resource_compiler 
     PRIVATE nlohmann_json::nlohmann_json
     PRIVATE Boost::uuid)
